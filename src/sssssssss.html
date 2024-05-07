@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Rate Card</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body style="padding: 2rem">
+    <div class="container-fluid">
+        <div class="container">
+            <h3>Uploaded Rate Card Data</h3>
+
+            <div class="row">
+                <div class="col">
+                    <form style="margin-top: 2rem;" id="rateCardForm" onsubmit="return validateForm()">
+                        <div class="mb-3">
+                            <label for="customerID" class="form-label">Customer ID</label>
+                            <input type="text" class="form-control form-control-lg" id="customerID" placeholder="enter customer id" aria-describedby="customerIDHelp">
+                            <div id="customerIDHelp" class="form-text" style="font-size: .8rem; font-weight: 600;">Entering a customer id will result in a custom rate card created for that account</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="rateCardName" class="form-label">Name</label>
+                            <input type="text" class="form-control form-control-lg" id="rateCardName" placeholder="enter rate card name">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="rateType" class="form-label">Rate Type</label>
+                            <select class="form-select form-control" aria-label="rate type" id="rateType">
+                                <option selected>Select Rate Type</option>
+                                <option value="delivery">Delivery</option>
+                                <option value="fleet">Vehicle Booking</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3" style="margin-top: 1rem;">
+                            <label for="formFileLg" class="form-label">Select file (.xlsx)</label>
+                            <input class="form-control form-control-lg" id="formFileLg" type="file" required>
+                            <div id="fileError" class="invalid-feedback" style="display: none;">Please select a file.</div>
+                        </div>
+            
+                        <button type="submit" class="btn btn-primary btn-lg" style="margin-top: 1rem; padding-left: 5rem; padding-right: 5rem;">Submit</button>
+                    </form>
+
+                    <div id="dataTable" style="margin-top: 5rem;">
+                        <h4>Records List</h4>
+                        <table class="table" style="margin-top: 1rem;">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Customer ID</th>
+                                    <th scope="col">Rate Type</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rateCardTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<!-- add onsubmit to form line 11 -->
+<script>
+    async function validateForm() {
+        var customerID = document.getElementById('customerID').value.trim();
+        var rateCardName = document.getElementById('rateCardName').value.trim();
+        var rateType = document.getElementById('rateType').value.trim();
+        var fileInput = document.getElementById('formFileLg').files[0];
+
+        // Validate Customer ID (optional)
+
+        // Validate Rate Card Name
+        if (rateCardName.length === 0) {
+            alert("Please enter a rate card name.");
+            return false;
+        }
+
+        // Validate File Upload
+        if (!fileInput) {
+            document.getElementById('fileError').style.display = 'block';
+            return false;
+        }
+
+        var formData = new FormData();
+        formData.append('customerID', customerID);
+        formData.append('rateCardName', rateCardName);
+        formData.append('rateType', rateType);
+        formData.append('file', fileInput);
+
+        try {
+            const response = await fetch('http://localhost:3001/rates-cards/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to upload rate card');
+            }
+
+            const data = await response.json();
+            console.log(data);
+            updateRateCardTable(data);
+            // Process the data as needed
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    function updateRateCardTable(rateCardData) {
+        var tableBody = document.getElementById('rateCardTableBody');
+        var newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td>${rateCardData.Name}</td>
+            <td>${rateCardData.CustomerID}</td>
+            <td>${rateCardData.RateType}</td>
+        `;
+        tableBody.appendChild(newRow);
+    }
+</script>

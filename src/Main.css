@@ -1,0 +1,22 @@
+form{
+    margin-top: 2rem;
+
+}
+.form-text{
+font-size: .8rem; 
+font-weight: 600;
+}
+.invalid-feedback{
+    display: none
+}
+button{
+    margin-top: 1rem;
+    padding-left: 5rem; 
+    padding-right: 5rem;
+   }
+.dataTable{
+    margin-top: 5rem;
+}
+.table{
+    margin-top: 1rem;
+}
